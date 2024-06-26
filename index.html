@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, orientation=landscape"><!-- Highlighted change: Added orientation to viewport -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, orientation=landscape">
     <title>¿Quieres ser mi novia?</title>
     <style>
         body {
@@ -21,10 +21,10 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center; /* Center vertically */
+            justify-content: center;
             position: relative;
-            width: 100vw; /* Ensure container takes full width */
-            height: 100vh; /* Ensure container takes full height */
+            width: 100vw;
+            height: 100vh;
         }
         .stars {
             display: flex;
@@ -74,7 +74,7 @@
         .red {
             background-color: red;
             color: white;
-            display: none; /* Initially hidden */
+            display: none;
         }
         @keyframes flash {
             0%, 100% { opacity: 1; }
@@ -90,14 +90,7 @@
                 opacity: 0;
             }
         }
-        .heart {
-            position: absolute;
-            bottom: 0;
-            font-size: 3em;
-            color: red;
-            animation: float 5s linear infinite;
-        }
-        .cat {
+        .heart, .cat, .bear {
             position: absolute;
             bottom: 0;
             font-size: 3em;
@@ -111,10 +104,7 @@
                 font-size: 1em;
                 padding: 8px 16px;
             }
-            #message {
-                font-size: 1.5em;
-            }
-            #experience {
+            #message, #experience {
                 font-size: 1.5em;
             }
         }
@@ -122,7 +112,7 @@
 </head>
 <body>
     <div class="container">
-        <div id="experience">¿Qué le pareció su experiencia?</div><!-- New phrase added here -->
+        <div id="experience">¿Qué le pareció su experiencia?</div>
         <div class="stars" id="starsContainer">
             <span class="star" data-value="1">&#9733;</span>
             <span class="star" data-value="2">&#9733;</span>
@@ -142,7 +132,6 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            // Request fullscreen on page load
             if (document.documentElement.requestFullscreen) {
                 document.documentElement.requestFullscreen();
             } else if (document.documentElement.webkitRequestFullscreen) {
@@ -167,7 +156,7 @@
             "Quieres ser mi novia? ❤️"
         ];
         let isGreenButtonPressed = false;
-        let heartSpawningActive = false; // Flag to check if heart spawning is active
+        let heartSpawningActive = false;
         let catInterval;
 
         const updateStars = (value) => {
@@ -177,10 +166,10 @@
             message.textContent = messages[value - 1];
             if (value === 5) {
                 buttons.style.display = 'flex';
-                noButton.style.display = 'block'; // Show red button only when 5 stars are clicked
+                noButton.style.display = 'block';
             } else {
                 buttons.style.display = 'none';
-                noButton.style.display = 'none'; // Hide red button otherwise
+                noButton.style.display = 'none';
             }
         };
 
@@ -197,11 +186,11 @@
                 spawnHearts();
             }
             isGreenButtonPressed = true;
-            startSpawningCats(); // Start spawning cats on mousedown
+            startSpawningEmojis(); // Start spawning cats and bears on mousedown
         });
 
         yesButton.addEventListener('mouseup', () => {
-            stopSpawningCats(); // Stop spawning cats on mouseup
+            stopSpawningEmojis(); // Stop spawning cats and bears on mouseup
         });
 
         yesButton.addEventListener('touchstart', () => {
@@ -213,11 +202,11 @@
                 spawnHearts();
             }
             isGreenButtonPressed = true;
-            startSpawningCats(); // Start spawning cats on touchstart
+            startSpawningEmojis(); // Start spawning cats and bears on touchstart
         });
 
         yesButton.addEventListener('touchend', () => {
-            stopSpawningCats(); // Stop spawning cats on touchend
+            stopSpawningEmojis(); // Stop spawning cats and bears on touchend
         });
 
         const moveButtonRandomly = (button) => {
@@ -233,7 +222,7 @@
 
         noButton.addEventListener('click', () => {
             moveButtonRandomly(noButton);
-            greenButtonSize += 0.2; // Increase the size by 20%
+            greenButtonSize += 0.2;
             yesButton.style.transform = `scale(${greenButtonSize})`;
             if (isGreenButtonPressed) {
                 message.textContent = "Too Late!";
@@ -244,12 +233,12 @@
             heartSpawningActive = true;
             const heartInterval = setInterval(() => {
                 createHeart();
-            }, 100); // Create heart every 100ms
+            }, 100);
 
             setTimeout(() => {
                 clearInterval(heartInterval);
-                heartSpawningActive = false; // Reset the flag after 10 seconds
-            }, 10000); // Stop after 10 seconds
+                heartSpawningActive = false;
+            }, 10000);
         };
 
         const createHeart = () => {
@@ -259,16 +248,17 @@
             heart.style.left = `${Math.random() * 100}vw`;
             heart.style.animationDelay = `${Math.random() * 2}s`;
             document.body.appendChild(heart);
-            setTimeout(() => heart.remove(), 5000); // Remove after animation
+            setTimeout(() => heart.remove(), 5000);
         };
 
-        const startSpawningCats = () => {
+        const startSpawningEmojis = () => {
             catInterval = setInterval(() => {
                 createCat();
-            }, 50); // Create cat every 50ms to spawn more cats
+                createBear();
+            }, 50);
         };
 
-        const stopSpawningCats = () => {
+        const stopSpawningEmojis = () => {
             clearInterval(catInterval);
         };
 
@@ -279,13 +269,23 @@
             cat.style.left = `${Math.random() * 100}vw`;
             cat.style.animationDelay = `${Math.random() * 2}s`;
             document.body.appendChild(cat);
-            setTimeout(() => cat.remove(), 5000); // Remove after animation
+            setTimeout(() => cat.remove(), 5000);
+        };
+
+        const createBear = () => {
+            const bear = document.createElement('div');
+            bear.className = 'bear';
+            bear.textContent = '🐻';
+            bear.style.left = `${Math.random() * 100}vw`;
+            bear.style.animationDelay = `${Math.random() * 2}s`;
+            document.body.appendChild(bear);
+            setTimeout(() => bear.remove(), 5000);
         };
 
         // Adding touch events for mobile devices
         noButton.addEventListener('touchstart', () => {
             moveButtonRandomly(noButton);
-            greenButtonSize += 0.2; // Increase the size by 20%
+            greenButtonSize += 0.2;
             yesButton.style.transform = `scale(${greenButtonSize})`;
             if (isGreenButtonPressed) {
                 message.textContent = "Too Late!";
