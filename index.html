@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, orientation=landscape">
+    <meta name="viewport" content="width=device-width, orientation=landscape">
     <title>¿Quieres ser mi novia?</title>
     <style>
         body {
@@ -170,7 +170,6 @@
             <span class="star" data-value="4">&#9733;</span>
             <span class="star" data-value="5">&#9733;</span>
         </div>
-        <div id="songTitle">Luz y Sombra</div> <!-- Song title added here -->
         <img src="Luz y Sombra Cover.webp" id="cubicImage" class="cubic-image" alt="Cubic Image">
         <div id="message"></div>
         <div class="buttons">
@@ -189,6 +188,7 @@
             <button class="control-button" id="fastForwardButton">&#9654;&#9654;</button>
             <button class="control-button" id="replayButton" style="display:none;">&#8635;</button>
         </div>
+        <div id="songTitle">Luz y Sombra</div> <!-- Moved song title position -->
     </div>
     <audio id="audio" src="Luz y Sombra.mp3"></audio> <!-- Audio element with updated source -->
 
@@ -259,12 +259,11 @@
             audio.play();
             experience.style.display = 'none';
             starsContainer.style.display = 'none';
-            songTitle.style.display = 'block';
             cubicImage.style.display = 'block';
             audioPlayer.style.display = 'block';
             audioControls.style.display = 'flex';
             updateAudioProgress();
-            setTimeout(hideButtons, 15000); // Just hide buttons, not stopping emojis
+            setTimeout(hideElements, 15000); // Hide buttons, message, and move song title
 
             if (!emojiSpawningActive) {
                 emojiSpawningActive = true;
@@ -344,9 +343,13 @@
             replayButton.style.display = 'none';
         });
 
-        function hideButtons() {
+        function hideElements() {
             yesButton.style.display = 'none';
             noButton.style.display = 'none';
+            message.style.display = 'none';
+            songTitle.style.display = 'block';
+            songTitle.style.position = 'static'; // Move song title
+            songTitle.style.marginBottom = '20px'; // Adjust margin if needed
         }
     </script>
 </body>
