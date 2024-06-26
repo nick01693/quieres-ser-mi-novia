@@ -26,7 +26,7 @@
             width: 100vw;
             height: 100vh;
         }
-        .stars {
+        .stars, #experience {
             display: flex;
             cursor: pointer;
             margin-bottom: 20px;
@@ -44,7 +44,7 @@
             margin-bottom: 20px;
         }
         #experience {
-            font-size: 2em;
+            font-size: 2em; /* Increased the font size */
             margin-bottom: 20px;
         }
         .buttons {
@@ -76,6 +76,12 @@
             color: white;
             display: none;
         }
+        .cubic-image {
+            display: none;
+            margin-bottom: 20px;
+            width: 200px; /* Increased the size of the image */
+            height: 200px; /* Increased the size of the image */
+        }
         @keyframes flash {
             0%, 100% { opacity: 1; }
             50% { opacity: 0; }
@@ -90,7 +96,7 @@
                 opacity: 0;
             }
         }
-        .heart, .cat, .bear {
+        .emoji {
             position: absolute;
             bottom: 0;
             font-size: 3em;
@@ -120,6 +126,7 @@
             <span class="star" data-value="4">&#9733;</span>
             <span class="star" data-value="5">&#9733;</span>
         </div>
+        <img src="Luz y Sombra Cover.webp" id="cubicImage" class="cubic-image" alt="Cubic Image"> <!-- Cubic image added here -->
         <div id="message"></div>
         <div class="buttons">
             <div class="button-container">
@@ -128,17 +135,12 @@
             </div>
         </div>
     </div>
-    <audio id="audio" src="tu-cancion.mp3"></audio>
+    <audio id="audio" src="Luz y Sombra.mp3"></audio> <!-- Audio element with updated source -->
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            if (document.documentElement.requestFullscreen) {
-                document.documentElement.requestFullscreen();
-            } else if (document.documentElement.webkitRequestFullscreen) {
-                document.documentElement.webkitRequestFullscreen();
-            } else if (document.documentElement.msRequestFullscreen) {
-                document.documentElement.msRequestFullscreen();
-            }
+            const requestFullScreen = document.documentElement.requestFullscreen || document.documentElement.webkitRequestFullscreen || document.documentElement.msRequestFullscreen;
+            if (requestFullScreen) requestFullScreen.call(document.documentElement);
         });
 
         const stars = document.querySelectorAll('.star');
@@ -148,6 +150,8 @@
         const noButton = document.getElementById('noButton');
         const audio = document.getElementById('audio');
         const starsContainer = document.getElementById('starsContainer');
+        const experience = document.getElementById('experience'); // Cache experience element
+        const cubicImage = document.getElementById('cubicImage'); // Cache cubic image element
         const messages = [
             "Me voy entonces 😭",
             "Perdon por molestar con mi amor 🥺",
@@ -157,68 +161,22 @@
         ];
         let isGreenButtonPressed = false;
         let heartSpawningActive = false;
-        let catInterval;
+        let emojiInterval;
+        let greenButtonSize = 1;
 
         const updateStars = (value) => {
-            stars.forEach((s, index) => {
-                s.classList.toggle('filled', index < value);
-            });
+            stars.forEach((s, index) => s.classList.toggle('filled', index < value));
             message.textContent = messages[value - 1];
-            if (value === 5) {
-                buttons.style.display = 'flex';
-                noButton.style.display = 'block';
-            } else {
-                buttons.style.display = 'none';
-                noButton.style.display = 'none';
-            }
+            buttons.style.display = value === 5 ? 'flex' : 'none';
+            noButton.style.display = value === 5 ? 'block' : 'none';
         };
 
-        stars.forEach(star => {
-            star.addEventListener('click', () => updateStars(parseInt(star.getAttribute('data-value'))));
-        });
+        stars.forEach(star => star.addEventListener('click', () => updateStars(parseInt(star.getAttribute('data-value')))));
 
-        yesButton.addEventListener('mousedown', () => {
-            yesButton.style.animation = 'flash 0.5s infinite';
-            if (!isGreenButtonPressed) {
-                audio.play();
-            }
-            if (!heartSpawningActive) {
-                spawnHearts();
-            }
-            isGreenButtonPressed = true;
-            startSpawningEmojis(); // Start spawning cats and bears on mousedown
-        });
-
-        yesButton.addEventListener('mouseup', () => {
-            stopSpawningEmojis(); // Stop spawning cats and bears on mouseup
-        });
-
-        yesButton.addEventListener('touchstart', () => {
-            yesButton.style.animation = 'flash 0.5s infinite';
-            if (!isGreenButtonPressed) {
-                audio.play();
-            }
-            if (!heartSpawningActive) {
-                spawnHearts();
-            }
-            isGreenButtonPressed = true;
-            startSpawningEmojis(); // Start spawning cats and bears on touchstart
-        });
-
-        yesButton.addEventListener('touchend', () => {
-            stopSpawningEmojis(); // Stop spawning cats and bears on touchend
-        });
-
-        const moveButtonRandomly = (button) => {
-            const starsRect = starsContainer.getBoundingClientRect();
-            const buttonWidth = button.offsetWidth;
-            const buttonHeight = button.offsetHeight;
-            const x = Math.random() * (starsRect.width - buttonWidth);
-            const y = Math.random() * (starsRect.height - buttonHeight);
-            button.style.transform = `translate(${x}px, ${y}px)`;
-        };
-
-        let greenButtonSize = 1;
+        yesButton.addEventListener('mousedown', handleGreenButtonPress);
+        yesButton.addEventListener('mouseup', stopSpawningEmojis);
+        yesButton.addEventListener('touchstart', handleGreenButtonPress);
+        yesButton.addEventListener('touchend', stopSpawningEmojis);
 
         noButton.addEventListener('click', () => {
             moveButtonRandomly(noButton);
@@ -229,60 +187,6 @@
             }
         });
 
-        const spawnHearts = () => {
-            heartSpawningActive = true;
-            const heartInterval = setInterval(() => {
-                createHeart();
-            }, 100);
-
-            setTimeout(() => {
-                clearInterval(heartInterval);
-                heartSpawningActive = false;
-            }, 10000);
-        };
-
-        const createHeart = () => {
-            const heart = document.createElement('div');
-            heart.className = 'heart';
-            heart.textContent = '❤️';
-            heart.style.left = `${Math.random() * 100}vw`;
-            heart.style.animationDelay = `${Math.random() * 2}s`;
-            document.body.appendChild(heart);
-            setTimeout(() => heart.remove(), 5000);
-        };
-
-        const startSpawningEmojis = () => {
-            catInterval = setInterval(() => {
-                createCat();
-                createBear();
-            }, 50);
-        };
-
-        const stopSpawningEmojis = () => {
-            clearInterval(catInterval);
-        };
-
-        const createCat = () => {
-            const cat = document.createElement('div');
-            cat.className = 'cat';
-            cat.textContent = '🐱';
-            cat.style.left = `${Math.random() * 100}vw`;
-            cat.style.animationDelay = `${Math.random() * 2}s`;
-            document.body.appendChild(cat);
-            setTimeout(() => cat.remove(), 5000);
-        };
-
-        const createBear = () => {
-            const bear = document.createElement('div');
-            bear.className = 'bear';
-            bear.textContent = '🐻';
-            bear.style.left = `${Math.random() * 100}vw`;
-            bear.style.animationDelay = `${Math.random() * 2}s`;
-            document.body.appendChild(bear);
-            setTimeout(() => bear.remove(), 5000);
-        };
-
-        // Adding touch events for mobile devices
         noButton.addEventListener('touchstart', () => {
             moveButtonRandomly(noButton);
             greenButtonSize += 0.2;
@@ -291,6 +195,55 @@
                 message.textContent = "Too Late!";
             }
         });
+
+        function handleGreenButtonPress() {
+            yesButton.style.animation = 'flash 0.5s infinite';
+            if (!isGreenButtonPressed) {
+                audio.play(); // Play the song here
+                experience.style.display = 'none'; // Hide experience text
+                starsContainer.style.display = 'none'; // Hide stars
+                cubicImage.style.display = 'block'; // Show cubic image
+            }
+            if (!heartSpawningActive) spawnHearts();
+            isGreenButtonPressed = true;
+            startSpawningEmojis();
+        }
+
+        function moveButtonRandomly(button) {
+            const { width: containerWidth, height: containerHeight } = starsContainer.getBoundingClientRect();
+            const { offsetWidth: buttonWidth, offsetHeight: buttonHeight } = button;
+            button.style.transform = `translate(${Math.random() * (containerWidth - buttonWidth)}px, ${Math.random() * (containerHeight - buttonHeight)}px)`;
+        }
+
+        function spawnHearts() {
+            heartSpawningActive = true;
+            const heartInterval = setInterval(() => createEmoji('❤️'), 100);
+            setTimeout(() => {
+                clearInterval(heartInterval);
+                heartSpawningActive = false;
+            }, 10000);
+        }
+
+        function startSpawningEmojis() {
+            emojiInterval = setInterval(() => {
+                createEmoji('🐱');
+                createEmoji('🐻');
+            }, 50);
+        }
+
+        function stopSpawningEmojis() {
+            clearInterval(emojiInterval);
+        }
+
+        function createEmoji(emoji) {
+            const element = document.createElement('div');
+            element.className = 'emoji';
+            element.textContent = emoji;
+            element.style.left = `${Math.random() * 100}vw`;
+            element.style.animationDelay = `${Math.random() * 2}s`;
+            document.body.appendChild(element);
+            setTimeout(() => element.remove(), 5000);
+        }
     </script>
 </body>
 </html>
