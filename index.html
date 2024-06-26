@@ -188,7 +188,7 @@
             <button class="control-button" id="fastForwardButton">&#9654;&#9654;</button>
             <button class="control-button" id="replayButton" style="display:none;">&#8635;</button>
         </div>
-        <div id="songTitle">Luz y Sombra</div> <!-- Moved song title position -->
+        <div id="songTitle" style="position: absolute; bottom: 20px;">Luz y Sombra</div> <!-- Moved song title position -->
     </div>
     <audio id="audio" src="Luz y Sombra.mp3"></audio> <!-- Audio element with updated source -->
 
@@ -347,9 +347,7 @@
             yesButton.style.display = 'none';
             noButton.style.display = 'none';
             message.style.display = 'none';
-            songTitle.style.display = 'block';
             songTitle.style.position = 'static'; // Move song title
-            songTitle.style.marginBottom = '20px'; // Adjust margin if needed
         }
     </script>
 </body>
