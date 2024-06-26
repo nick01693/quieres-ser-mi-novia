@@ -11,8 +11,8 @@
             align-items: center;
             height: 100vh;
             margin: 0;
-            background-color: white;
-            color: black;
+            background-color: #121212; /* Dark background */
+            color: #f0f0f0; /* Light font color */
             font-family: Arial, sans-serif;
             text-align: center;
             overflow: hidden;
@@ -44,7 +44,7 @@
             margin-bottom: 20px;
         }
         #experience {
-            font-size: 2em; /* Increased the font size */
+            font-size: 2em;
             margin-bottom: 20px;
         }
         .buttons {
@@ -65,11 +65,14 @@
             font-size: 1.5em;
             cursor: pointer;
             user-select: none;
+            transition: transform 0.1s;
+        }
+        .button:active {
+            transform: scale(0.95);
         }
         .green {
             background-color: green;
             color: white;
-            transition: transform 0.3s;
         }
         .red {
             background-color: red;
@@ -79,8 +82,44 @@
         .cubic-image {
             display: none;
             margin-bottom: 20px;
-            width: 200px; /* Increased the size of the image */
-            height: 200px; /* Increased the size of the image */
+            width: 300px;
+            height: 300px;
+        }
+        .audio-player {
+            display: none;
+            width: 320px;
+            height: 30px;
+            margin-top: 10px;
+            background-color: gray;
+            border-radius: 15px;
+            overflow: hidden;
+            position: relative;
+        }
+        .audio-progress {
+            height: 100%;
+            background-color: #ffffff; /* White color */
+            width: 0;
+            transition: width 0.1s;
+        }
+        .audio-controls {
+            display: none;
+            justify-content: center;
+            margin-top: 10px;
+        }
+        .control-button {
+            background: none;
+            border: none;
+            color: #f0f0f0;
+            font-size: 1.5em;
+            margin: 0 5px;
+            cursor: pointer;
+            transition: color 0.3s, transform 0.1s;
+        }
+        .control-button:active {
+            transform: scale(0.9);
+        }
+        .control-button:hover {
+            color: #4caf50;
         }
         @keyframes flash {
             0%, 100% { opacity: 1; }
@@ -100,7 +139,12 @@
             position: absolute;
             bottom: 0;
             font-size: 3em;
-            animation: float 5s linear infinite;
+            animation: float 7s linear;
+        }
+        #songTitle {
+            display: none;
+            font-size: 2em;
+            margin-bottom: 10px;
         }
         @media (max-width: 600px) {
             .star {
@@ -110,7 +154,7 @@
                 font-size: 1em;
                 padding: 8px 16px;
             }
-            #message, #experience {
+            #message, #experience, #songTitle {
                 font-size: 1.5em;
             }
         }
@@ -126,13 +170,24 @@
             <span class="star" data-value="4">&#9733;</span>
             <span class="star" data-value="5">&#9733;</span>
         </div>
-        <img src="Luz y Sombra Cover.webp" id="cubicImage" class="cubic-image" alt="Cubic Image"> <!-- Cubic image added here -->
+        <div id="songTitle">Luz y Sombra</div> <!-- Song title added here -->
+        <img src="Luz y Sombra Cover.webp" id="cubicImage" class="cubic-image" alt="Cubic Image">
         <div id="message"></div>
         <div class="buttons">
             <div class="button-container">
                 <div class="button green" id="yesButton">Si</div>
                 <div class="button red" id="noButton">No</div>
             </div>
+        </div>
+        <div class="audio-player" id="audioPlayer">
+            <div class="audio-progress" id="audioProgress"></div>
+        </div>
+        <div class="audio-controls" id="audioControls">
+            <button class="control-button" id="rewindButton">&#9664;&#9664;</button>
+            <button class="control-button" id="pauseButton">&#10074;&#10074;</button>
+            <button class="control-button" id="playButton" style="display:none;">&#9654;</button>
+            <button class="control-button" id="fastForwardButton">&#9654;&#9654;</button>
+            <button class="control-button" id="replayButton" style="display:none;">&#8635;</button>
         </div>
     </div>
     <audio id="audio" src="Luz y Sombra.mp3"></audio> <!-- Audio element with updated source -->
@@ -150,8 +205,17 @@
         const noButton = document.getElementById('noButton');
         const audio = document.getElementById('audio');
         const starsContainer = document.getElementById('starsContainer');
-        const experience = document.getElementById('experience'); // Cache experience element
-        const cubicImage = document.getElementById('cubicImage'); // Cache cubic image element
+        const experience = document.getElementById('experience');
+        const cubicImage = document.getElementById('cubicImage');
+        const songTitle = document.getElementById('songTitle');
+        const audioPlayer = document.getElementById('audioPlayer');
+        const audioProgress = document.getElementById('audioProgress');
+        const playButton = document.getElementById('playButton');
+        const pauseButton = document.getElementById('pauseButton');
+        const rewindButton = document.getElementById('rewindButton');
+        const fastForwardButton = document.getElementById('fastForwardButton');
+        const replayButton = document.getElementById('replayButton');
+        const audioControls = document.getElementById('audioControls');
         const messages = [
             "Me voy entonces 😭",
             "Perdon por molestar con mi amor 🥺",
@@ -160,9 +224,7 @@
             "Quieres ser mi novia? ❤️"
         ];
         let isGreenButtonPressed = false;
-        let heartSpawningActive = false;
-        let emojiInterval;
-        let greenButtonSize = 1;
+        let emojiSpawningActive = false;
 
         const updateStars = (value) => {
             stars.forEach((s, index) => s.classList.toggle('filled', index < value));
@@ -174,14 +236,10 @@
         stars.forEach(star => star.addEventListener('click', () => updateStars(parseInt(star.getAttribute('data-value')))));
 
         yesButton.addEventListener('mousedown', handleGreenButtonPress);
-        yesButton.addEventListener('mouseup', stopSpawningEmojis);
         yesButton.addEventListener('touchstart', handleGreenButtonPress);
-        yesButton.addEventListener('touchend', stopSpawningEmojis);
 
         noButton.addEventListener('click', () => {
             moveButtonRandomly(noButton);
-            greenButtonSize += 0.2;
-            yesButton.style.transform = `scale(${greenButtonSize})`;
             if (isGreenButtonPressed) {
                 message.textContent = "Too Late!";
             }
@@ -189,24 +247,30 @@
 
         noButton.addEventListener('touchstart', () => {
             moveButtonRandomly(noButton);
-            greenButtonSize += 0.2;
-            yesButton.style.transform = `scale(${greenButtonSize})`;
             if (isGreenButtonPressed) {
                 message.textContent = "Too Late!";
             }
         });
 
         function handleGreenButtonPress() {
+            if (isGreenButtonPressed) return; // Prevent re-running the logic
+
             yesButton.style.animation = 'flash 0.5s infinite';
-            if (!isGreenButtonPressed) {
-                audio.play(); // Play the song here
-                experience.style.display = 'none'; // Hide experience text
-                starsContainer.style.display = 'none'; // Hide stars
-                cubicImage.style.display = 'block'; // Show cubic image
+            audio.play();
+            experience.style.display = 'none';
+            starsContainer.style.display = 'none';
+            songTitle.style.display = 'block';
+            cubicImage.style.display = 'block';
+            audioPlayer.style.display = 'block';
+            audioControls.style.display = 'flex';
+            updateAudioProgress();
+            setTimeout(hideButtons, 15000); // Just hide buttons, not stopping emojis
+
+            if (!emojiSpawningActive) {
+                emojiSpawningActive = true;
+                spawnEmojis();
             }
-            if (!heartSpawningActive) spawnHearts();
             isGreenButtonPressed = true;
-            startSpawningEmojis();
         }
 
         function moveButtonRandomly(button) {
@@ -215,24 +279,16 @@
             button.style.transform = `translate(${Math.random() * (containerWidth - buttonWidth)}px, ${Math.random() * (containerHeight - buttonHeight)}px)`;
         }
 
-        function spawnHearts() {
-            heartSpawningActive = true;
-            const heartInterval = setInterval(() => createEmoji('❤️'), 100);
-            setTimeout(() => {
-                clearInterval(heartInterval);
-                heartSpawningActive = false;
-            }, 10000);
-        }
+        function spawnEmojis() {
+            const emojis = ['❤️', '🐱', '🐻'];
 
-        function startSpawningEmojis() {
-            emojiInterval = setInterval(() => {
-                createEmoji('🐱');
-                createEmoji('🐻');
-            }, 50);
-        }
-
-        function stopSpawningEmojis() {
-            clearInterval(emojiInterval);
+            const spawnEmoji = () => {
+                if (emojiSpawningActive) {
+                    createEmoji(emojis[Math.floor(Math.random() * emojis.length)]);
+                    setTimeout(spawnEmoji, 1000); // Spawn every second
+                }
+            };
+            spawnEmoji();
         }
 
         function createEmoji(emoji) {
@@ -240,9 +296,57 @@
             element.className = 'emoji';
             element.textContent = emoji;
             element.style.left = `${Math.random() * 100}vw`;
+            element.style.animation = 'float 7s linear'; // Ensure the animation is applied
             element.style.animationDelay = `${Math.random() * 2}s`;
             document.body.appendChild(element);
-            setTimeout(() => element.remove(), 5000);
+            setTimeout(() => element.remove(), 7000); // Keep the emojis visible for 7 seconds (adjust as needed)
+        }
+
+        function updateAudioProgress() {
+            const duration = audio.duration;
+            const currentTime = audio.currentTime;
+            const progressPercent = (currentTime / duration) * 100;
+            audioProgress.style.width = progressPercent + '%';
+            if (!audio.paused && !audio.ended) {
+                requestAnimationFrame(updateAudioProgress);
+            }
+        }
+
+        audio.addEventListener('play', updateAudioProgress);
+        audio.addEventListener('timeupdate', updateAudioProgress);
+
+        playButton.addEventListener('click', () => {
+            audio.play();
+            playButton.style.display = 'none';
+            pauseButton.style.display = 'inline';
+        });
+
+        pauseButton.addEventListener('click', () => {
+            audio.pause();
+            pauseButton.style.display = 'none';
+            playButton.style.display = 'inline';
+        });
+
+        rewindButton.addEventListener('click', () => audio.currentTime = Math.max(0, audio.currentTime - 10));
+        fastForwardButton.addEventListener('click', () => audio.currentTime = Math.min(audio.duration, audio.currentTime + 10));
+        replayButton.addEventListener('click', () => {
+            audio.currentTime = 0;
+            audio.play();
+        });
+
+        audio.addEventListener('ended', () => {
+            replayButton.style.display = 'inline';
+            pauseButton.style.display = 'none';
+            playButton.style.display = 'inline';
+        });
+
+        audio.addEventListener('play', () => {
+            replayButton.style.display = 'none';
+        });
+
+        function hideButtons() {
+            yesButton.style.display = 'none';
+            noButton.style.display = 'none';
         }
     </script>
 </body>
