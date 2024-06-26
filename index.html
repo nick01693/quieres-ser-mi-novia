@@ -167,6 +167,7 @@
             "Quieres ser mi novia? ❤️"
         ];
         let isGreenButtonPressed = false;
+        let heartSpawningActive = false; // Flag to check if heart spawning is active
         let catInterval;
 
         const updateStars = (value) => {
@@ -191,6 +192,8 @@
             yesButton.style.animation = 'flash 0.5s infinite';
             if (!isGreenButtonPressed) {
                 audio.play();
+            }
+            if (!heartSpawningActive) {
                 spawnHearts();
             }
             isGreenButtonPressed = true;
@@ -205,6 +208,8 @@
             yesButton.style.animation = 'flash 0.5s infinite';
             if (!isGreenButtonPressed) {
                 audio.play();
+            }
+            if (!heartSpawningActive) {
                 spawnHearts();
             }
             isGreenButtonPressed = true;
@@ -236,11 +241,15 @@
         });
 
         const spawnHearts = () => {
+            heartSpawningActive = true;
             const heartInterval = setInterval(() => {
                 createHeart();
             }, 100); // Create heart every 100ms
 
-            setTimeout(() => clearInterval(heartInterval), 10000); // Stop after 10 seconds
+            setTimeout(() => {
+                clearInterval(heartInterval);
+                heartSpawningActive = false; // Reset the flag after 10 seconds
+            }, 10000); // Stop after 10 seconds
         };
 
         const createHeart = () => {
