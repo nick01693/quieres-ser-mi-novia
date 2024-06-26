@@ -189,9 +189,11 @@
 
         yesButton.addEventListener('mousedown', () => {
             yesButton.style.animation = 'flash 0.5s infinite';
-            audio.play();
+            if (!isGreenButtonPressed) {
+                audio.play();
+                spawnHearts();
+            }
             isGreenButtonPressed = true;
-            spawnHearts();
             startSpawningCats(); // Start spawning cats on mousedown
         });
 
@@ -201,9 +203,11 @@
 
         yesButton.addEventListener('touchstart', () => {
             yesButton.style.animation = 'flash 0.5s infinite';
-            audio.play();
+            if (!isGreenButtonPressed) {
+                audio.play();
+                spawnHearts();
+            }
             isGreenButtonPressed = true;
-            spawnHearts();
             startSpawningCats(); // Start spawning cats on touchstart
         });
 
